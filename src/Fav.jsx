@@ -1,11 +1,12 @@
 import { useDispatch, useSelector } from 'react-redux';
 import LeftDashboard from './LeftDashboard';
-import { removeFavoriteCity } from './Store/Slices/FavCitySlice';
+import { removeFavoriteCity, selectFavCity } from './Store/Slices/FavCitySlice';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { home } from 'react-icons-kit/iconic/home';
 import Icon from "react-icons-kit";
 import { androidFavorite } from 'react-icons-kit/ionicons/androidFavorite';
+import { useNavigate } from 'react-router-dom';
 
 
 function Fav() {
@@ -23,8 +24,9 @@ function Fav() {
   }, []);
 
 
-  const favoriteCities = useSelector((state) => state.favorites);
+  const favoriteCities = useSelector((state) => state.favorites.cities);
   const dispatch = useDispatch()
+  const navigate = useNavigate()
 
   useEffect(() => {
     console.log('Favorite Cities:', favoriteCities);
@@ -53,7 +55,10 @@ function Fav() {
         {favoriteCities.length > 0 ? (
           <div className='py-4 grid grid-flex-row lg:grid-cols-2 grid-cols-1 gap-5'>
             {favoriteCities.map((city) => (
-              <div key={city.id} className={`${city.humidity >= 50 ? 'card-fav-orange' : 'card-fav'}`} >
+              <div key={city.id} className={`${city.humidity >= 50 ? 'card-fav-orange' : 'card-fav'}`} onClick={() => {
+                dispatch(selectFavCity(city))
+                navigate('/')
+              }}>
                 {console.log(city.id)}
                 <div className='flex justify-between'><h1 className='my-auto'>{city.name}</h1>
                   <span className='border border-gray-200 py-2 px-4 bg-red-400 text-white rounded-xl cursor-pointer' onClick={() => handleDelete(city.id)}>Delete</span>

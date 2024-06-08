@@ -5,19 +5,17 @@ import { arrowUp } from "react-icons-kit/feather/arrowUp";
 import { arrowDown } from "react-icons-kit/feather/arrowDown";
 import { droplet } from "react-icons-kit/feather/droplet";
 import { wind } from "react-icons-kit/feather/wind";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { activity } from "react-icons-kit/feather/activity";
 import { useDispatch, useSelector } from "react-redux";
 import { get5DaysForecast, getCityData } from "./Store/Slices/WeatherSlice.js";
 import { SphereSpinner } from "react-spinners-kit";
 import LeftDashboard from "./LeftDashboard";
 import { addFavoriteCity } from "./Store/Slices/FavCitySlice.js";
-import { useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from 'uuid';
 import { androidFavorite } from 'react-icons-kit/ionicons/androidFavorite';
 
 function Homepage() {
-
   const {
     citySearchLoading,
     citySearchData,
@@ -26,21 +24,32 @@ function Homepage() {
     forecastError,
   } = useSelector((state) => state.weather);
 
+  const { selectedCity } = useSelector((state) => state.favorites);
+
+  useEffect(() => {
+    if (selectedCity) {
+      setCity(selectedCity.name);
+      fetchData();
+    }
+  }, [selectedCity]);
+
   const [loadings, setLoadings] = useState(true);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const allLoadings = [citySearchLoading, forecastLoading];
+
   useEffect(() => {
     const isAnyChildLoading = allLoadings.some((state) => state);
     setLoadings(isAnyChildLoading);
   }, [allLoadings]);
 
-
   const [city, setCity] = useState("Gorakhpur");
-
-
-
   const [unit, setUnit] = useState("metric");
 
+  useEffect(() => {
+    if (selectedCity) {
+      setCity(selectedCity.name);
+      fetchData(selectedCity.name);
+    }
+  }, [selectedCity]);
 
   const toggleUnit = () => {
     setLoadings(true);
@@ -49,10 +58,10 @@ function Homepage() {
 
   const dispatch = useDispatch();
 
-  const fetchData = () => {
+  const fetchData = (cityName) => {
     dispatch(
       getCityData({
-        city,
+        city: cityName,
         unit,
       })
     ).then((res) => {
@@ -68,30 +77,28 @@ function Homepage() {
     });
   };
 
-
   useEffect(() => {
-    fetchData();
+    fetchData(city);
   }, [unit]);
-
 
   const handleCitySearch = (e) => {
     e.preventDefault();
     setLoadings(true);
-    fetchData();
+    fetchData(city);
   };
 
   const filterForecastByFirstObjTime = (forecastData) => {
     if (!forecastData) {
       return [];
     }
-
     const firstObjTime = forecastData[0].dt_txt.split(" ")[1];
     return forecastData.filter((data) => data.dt_txt.endsWith(firstObjTime));
   };
 
   const filteredForecast = filterForecastByFirstObjTime(forecastData?.list);
-  const route = useNavigate()
+  const route = useNavigate();
   const [isSmallScreen, setIsSmallScreen] = useState(false);
+
   useEffect(() => {
     const handleResize = () => {
       setIsSmallScreen(window.innerWidth <= 1024);
@@ -104,24 +111,21 @@ function Homepage() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  console.log(selectedCity)
+
   return (
     <div className="flex">
-
       <div className="hidden lg:block background w-1/3 bg-black text-white">
         <LeftDashboard />
       </div>
-
-      <div className={` footer-left  fixed bottom-0 w-full flex justify-around text-white h-10`}>
-        {/* <img className='' src="Man.jpg" alt="Profile" /> {/* Added alt text for accessibility */} {/*<button className='footer-left-text'>Log Out</button> */}
+      <div className={`footer-left fixed bottom-0 w-full flex justify-around text-white h-10`}>
         <div className={`${isSmallScreen ? 'block bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500' : 'hidden'} flex justify-around w-full`}>
           <Link to="/" className="my-auto"><Icon icon={home} size={20} className="my-auto" /></Link>
           <Link to="/fav" className="my-auto"><Icon icon={androidFavorite} size={20} className="my-auto" /></Link>
         </div>
       </div>
-
       <div className="w-full overflow-y box">
         <form autoComplete="off" onSubmit={handleCitySearch}>
-
           <input
             type="text"
             className="border border-gray-300 rounded-xl w-full py-2 px-1 ml-1.5"
@@ -133,19 +137,11 @@ function Homepage() {
           />
           <button type="submit" className="">GO</button>
         </form>
-
-
         <div className="current-weather-details-box">
-
           <div className="details-box-header">
-
             <h4>Current Weather</h4>
-
-
             <div className="switch" onClick={toggleUnit}>
-              <div
-                className={`switch-toggle ${unit === "metric" ? "c" : "f"}`}
-              ></div>
+              <div className={`switch-toggle ${unit === "metric" ? "c" : "f"}`}></div>
               <span className="c">C</span>
               <span className="f">F</span>
             </div>
@@ -166,12 +162,9 @@ function Homepage() {
                     <>
                       {citySearchData && citySearchData.data ? (
                         <div className="weather-details-container">
-
                           <div className="details">
                             <div className="details-city-name-div">
-                              <h4 className="city-name">
-                                {citySearchData.data.name}
-                              </h4>
+                              <h4 className="city-name">{citySearchData.data.name}</h4>
                               <span className="cursor-pointer" onClick={() => {
                                 if (citySearchData && citySearchData.data) {
                                   const favoriteData = {
@@ -180,14 +173,13 @@ function Homepage() {
                                     temp: citySearchData.data.main.temp,
                                     humidity: citySearchData.data.main.humidity,
                                     image: citySearchData.data.weather[0].icon,
-                                    wind: citySearchData.data.wind.speed
+                                    wind: citySearchData.data.wind.speed,
                                   };
                                   dispatch(addFavoriteCity(favoriteData));
                                 }
-                                route('/fav')
+                                route('/fav');
                               }}>Fav</span>
                             </div>
-
                             <div className="icon-and-temp">
                               <img
                                 src={`https://openweathermap.org/img/wn/${citySearchData.data.weather[0].icon}@2x.png`}
@@ -195,63 +187,31 @@ function Homepage() {
                               />
                               <h1>{citySearchData.data.main.temp}&deg;</h1>
                             </div>
-
                             <h4 className="description">
                               {citySearchData.data.weather[0].description}
                             </h4>
                           </div>
-
-
                           <div className="metrices">
-
-                            <h4>
-                              Feels like {citySearchData.data.main.feels_like}
-                              &deg;C
-                            </h4>
-
-
+                            <h4>Feels like {citySearchData.data.main.feels_like}&deg;C</h4>
                             <div className="key-value-box">
                               <div className="key">
-                                <Icon
-                                  icon={arrowUp}
-                                  size={20}
-                                  className="icon"
-                                />
-                                <span className="value">
-                                  {citySearchData.data.main.temp_max}
-                                  &deg;C
-                                </span>
+                                <Icon icon={arrowUp} size={20} className="icon" />
+                                <span className="value">{citySearchData.data.main.temp_max}&deg;C</span>
                               </div>
                               <div className="key">
-                                <Icon
-                                  icon={arrowDown}
-                                  size={20}
-                                  className="icon"
-                                />
-                                <span className="value">
-                                  {citySearchData.data.main.temp_min}
-                                  &deg;C
-                                </span>
+                                <Icon icon={arrowDown} size={20} className="icon" />
+                                <span className="value">{citySearchData.data.main.temp_min}&deg;C</span>
                               </div>
                             </div>
-
                             <div className="key-value-box">
                               <div className="key">
-                                <Icon
-                                  icon={droplet}
-                                  size={20}
-                                  className="icon"
-                                />
+                                <Icon icon={droplet} size={20} className="icon" />
                                 <span>Humidity</span>
                               </div>
                               <div className="value">
-                                <span>
-                                  {citySearchData.data.main.humidity}%
-                                </span>
+                                <span>{citySearchData.data.main.humidity}%</span>
                               </div>
                             </div>
-
-
                             <div className="key-value-box">
                               <div className="key">
                                 <Icon icon={wind} size={20} className="icon" />
@@ -261,22 +221,13 @@ function Homepage() {
                                 <span>{citySearchData.data.wind.speed}kph</span>
                               </div>
                             </div>
-
-
                             <div className="key-value-box">
                               <div className="key">
-                                <Icon
-                                  icon={activity}
-                                  size={20}
-                                  className="icon"
-                                />
+                                <Icon icon={activity} size={20} className="icon" />
                                 <span>Pressure</span>
                               </div>
                               <div className="value">
-                                <span>
-                                  {citySearchData.data.main.pressure}
-                                  hPa
-                                </span>
+                                <span>{citySearchData.data.main.pressure}hPa</span>
                               </div>
                             </div>
                           </div>
@@ -284,10 +235,7 @@ function Homepage() {
                       ) : (
                         <div className="error-msg">No Data Found</div>
                       )}
-
-                      <h4 className="extended-forecast-heading">
-                        Forecast for Seven Days
-                      </h4>
+                      <h4 className="extended-forecast-heading">Forecast for Seven Days</h4>
                       {filteredForecast.length > 0 ? (
                         <div className="extended-forecasts-container">
                           {filteredForecast.map((data, index) => {
@@ -304,8 +252,7 @@ function Homepage() {
                                 />
                                 <h5>{data.weather[0].description}</h5>
                                 <h5 className="min-max-temp">
-                                  {data.main.temp_max}&deg; /{" "}
-                                  {data.main.temp_min}&deg;
+                                  {data.main.temp_max}&deg; / {data.main.temp_min}&deg;
                                 </h5>
                               </div>
                             );
