@@ -284,7 +284,7 @@
   justify-content: center;
 }
 
-.left-dashboard .footer-left {
+.footer-left {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -299,7 +299,7 @@
   margin-bottom: auto;
 }
 
-.left-dashboard .footer-left .footer-left-text {
+.footer-left-text {
   font-weight: 500;
   font-size: 20px;
   border: 5px;

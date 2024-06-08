@@ -92,7 +92,7 @@ function Homepage() {
   return (
     <div className="flex">
 
-      <div className="background w-1/4 bg-black text-white">
+      <div className="hidden lg:block background w-1/3 bg-black text-white">
         <LeftDashboard />
       </div>
 

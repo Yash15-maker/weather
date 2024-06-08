@@ -18,7 +18,7 @@ function Fav() {
 
   return (
     <div className="flex">
-      <div className="background w-1/4 bg-black text-white lg:h-[700px] 2xl:h-auto">
+      <div className="hidden lg:block background w-1/4 bg-black text-white lg:h-[700px] 2xl:h-auto">
         <LeftDashboard />
       </div>
       <div className="w-full overflow-y lg:px-4 px-1">
