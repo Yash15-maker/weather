@@ -8,10 +8,7 @@ import Icon from "react-icons-kit";
 import { androidFavorite } from 'react-icons-kit/ionicons/androidFavorite';
 
 
-
 function Fav() {
-
-
   const [isSmallScreen, setIsSmallScreen] = useState(false);
   useEffect(() => {
     const handleResize = () => {
