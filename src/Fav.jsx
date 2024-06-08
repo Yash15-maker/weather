@@ -1,10 +1,31 @@
 import { useDispatch, useSelector } from 'react-redux';
 import LeftDashboard from './LeftDashboard';
 import { removeFavoriteCity } from './Store/Slices/FavCitySlice';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { home } from 'react-icons-kit/iconic/home';
+import Icon from "react-icons-kit";
+import { androidFavorite } from 'react-icons-kit/ionicons/androidFavorite';
+
 
 
 function Fav() {
+
+
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
+  useEffect(() => {
+    const handleResize = () => {
+      setIsSmallScreen(window.innerWidth <= 1024);
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize();
+
+    //unmounting
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+
   const favoriteCities = useSelector((state) => state.favorites);
   const dispatch = useDispatch()
 
@@ -18,8 +39,16 @@ function Fav() {
 
   return (
     <div className="flex">
-      <div className="hidden lg:block background w-1/4 bg-black text-white lg:h-[700px] 2xl:h-auto">
+      <div className="hidden lg:block background w-1/3 bg-black text-white">
         <LeftDashboard />
+      </div>
+
+      <div className={` footer-left  fixed bottom-0 w-full flex justify-around text-white h-10`}>
+        {/* <img className='' src="Man.jpg" alt="Profile" /> {/* Added alt text for accessibility */} {/*<button className='footer-left-text'>Log Out</button> */}
+        <div className={`${isSmallScreen ? 'block bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500' : 'hidden'} flex justify-around w-full`}>
+          <Link to="/" className="my-auto"><Icon icon={home} size={20} className="my-auto" /></Link>
+          <Link to="/fav" className="my-auto"><Icon icon={androidFavorite} size={20} className="my-auto" /></Link>
+        </div>
       </div>
       <div className="w-full overflow-y lg:px-4 px-1">
         <h2 className='text-4xl flex justify-center p-3'>Favorite Cities</h2>

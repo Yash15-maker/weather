@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import Icon from "react-icons-kit";
+import { home } from 'react-icons-kit/iconic/home';
 import { arrowUp } from "react-icons-kit/feather/arrowUp";
 import { arrowDown } from "react-icons-kit/feather/arrowDown";
 import { droplet } from "react-icons-kit/feather/droplet";
 import { wind } from "react-icons-kit/feather/wind";
+import { Link } from 'react-router-dom';
 import { activity } from "react-icons-kit/feather/activity";
 import { useDispatch, useSelector } from "react-redux";
 import { get5DaysForecast, getCityData } from "./Store/Slices/WeatherSlice.js";
@@ -12,6 +14,7 @@ import LeftDashboard from "./LeftDashboard";
 import { addFavoriteCity } from "./Store/Slices/FavCitySlice.js";
 import { useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from 'uuid';
+import { androidFavorite } from 'react-icons-kit/ionicons/androidFavorite';
 
 function Homepage() {
 
@@ -88,12 +91,32 @@ function Homepage() {
 
   const filteredForecast = filterForecastByFirstObjTime(forecastData?.list);
   const route = useNavigate()
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
+  useEffect(() => {
+    const handleResize = () => {
+      setIsSmallScreen(window.innerWidth <= 1024);
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize();
+
+    //unmounting
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   return (
     <div className="flex">
 
       <div className="hidden lg:block background w-1/3 bg-black text-white">
         <LeftDashboard />
+      </div>
+
+      <div className={` footer-left  fixed bottom-0 w-full flex justify-around text-white h-10`}>
+        {/* <img className='' src="Man.jpg" alt="Profile" /> {/* Added alt text for accessibility */} {/*<button className='footer-left-text'>Log Out</button> */}
+        <div className={`${isSmallScreen ? 'block bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500' : 'hidden'} flex justify-around w-full`}>
+          <Link to="/" className="my-auto"><Icon icon={home} size={20} className="my-auto" /></Link>
+          <Link to="/fav" className="my-auto"><Icon icon={androidFavorite} size={20} className="my-auto" /></Link>
+        </div>
       </div>
 
       <div className="w-full overflow-y box">
